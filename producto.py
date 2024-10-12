@@ -11,10 +11,5 @@ class Producto:
         self.precio = precio
         self.categoria_producto = categoria_producto
 
-    def generar_id():
-        return int(uuid.uuid4()) 
-    
-    def mostrar_productos(self):
-        return (self.id)    
- 
+
     
