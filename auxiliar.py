@@ -8,23 +8,27 @@ def dibujar_nodo(ventana, nodo, x, y, espacio, color=(0, 128, 255)):
             pygame.draw.line(ventana, (0,0,0), (x, y), (x + espacio, y + 50), 2)
 
         # Dibujar nodo
-        dibujar(ventana,nodo,x,y,espacio)
+        dibujar(ventana,nodo,x,y,espacio,color)
         pygame.display.update()
         dibujar_nodo(ventana, nodo.izquierda, x - espacio, y + 50, espacio // 2, color)
         dibujar_nodo(ventana, nodo.derecha, x + espacio, y + 50, espacio // 2, color)
-        dibujar(ventana,nodo,x,y,espacio)
+        dibujar(ventana,nodo,x,y,espacio,color)
+        pygame.display.update()
 
     
-def dibujar(ventana, nodo, x, y, espacio, color= (0, 128, 255), borde=(0,0,0)):
+def dibujar(ventana, nodo, x, y, espacio, color, borde=(0,0,0)):
     font = pygame.font.Font(None, 32)
-    pygame.draw.circle(ventana,color, (x, y), 20)
+    if nodo.producto.cantidad == 0:
+        pygame.draw.circle(ventana, (70, 75, 57), (x, y), 20)
+    else:   
+        pygame.draw.circle(ventana, (0, 128, 255), (x, y), 20)
     pygame.draw.circle(ventana, borde, (x, y), 20, 2)
     texto = font.render(str(nodo.producto.id), True, (255, 255, 255))
     ventana.blit(texto, (x -6 , y - 10))
     pygame.display.update()
-    pygame.draw.circle(ventana, borde, (x, y), 20, 2)
     time.sleep(0.2)
-    pygame.display.update()
+        
+    
 
 def dibujar_animacion_buscar_id(ventana,nodo,x,y,espacio,font,id):
     if nodo:
@@ -45,8 +49,57 @@ def dibujar_animacion_buscar_id(ventana,nodo,x,y,espacio,font,id):
         if id > nodo.producto.id:
            return dibujar_animacion_buscar_id(ventana,nodo.derecha,x + espacio, y+50 ,espacio//2,font,id)
         else:
-            return dibujar_animacion_buscar_id(ventana,nodo.derecha,x - espacio, y+50, espacio//2,font,id)
+            return dibujar_animacion_buscar_id(ventana,nodo.izquierda,x - espacio, y+50, espacio//2,font,id)
     return False
+def dibujar_animacion_filtrar_combinada(ventana,nodo,x,y,espacio,font,categoria,cantidad,precio_min,precio_max,raiz):
+        pygame.draw.circle(ventana,(255,0,0),(x,y),20,2)
+        pygame.display.update()
+        time.sleep(1)
+        y_texto=30
+        font_texto = pygame.font.Font(None, 25)
+        if validar_precio(nodo,precio_min,precio_max) and validar_categoria(nodo,categoria) and validar_cantidad(nodo,cantidad):
+            if validar_precio(nodo,precio_min,precio_max):
+                ventana.blit(font_texto.render(f'Nodo encontrado con un precio mayor que {precio_min} y un precio menor que {precio_max}' ,True,(0,0,0)),(30,y_texto))
+                y_texto+=30
+            if validar_categoria(nodo,categoria):
+                ventana.blit(font_texto.render(f'Nodo encontrado con una categoria {categoria}' ,True,(0,0,0)),(30,y_texto))
+                y_texto+=30
+            if validar_cantidad(nodo,cantidad):
+                ventana.blit(font_texto.render(f'Nodo encontrado con una cantidad {cantidad}' ,True,(0,0,0)),(30,y_texto))
+                y_texto+=30
+            pygame.display.update()
+            time.sleep(3)
+            ventana.fill((255,255,255))
+            pintar_cuadro_informacion(ventana,font,nodo)
+            pygame.display.update()
+            time.sleep(5)
+            ventana.fill((255,255,255))
+            dibujar_nodo_main(ventana, raiz, (683), 150, 120,font)
+            pygame.display.update()
+            
+        pygame.draw.circle(ventana,(0,0,0),(x,y),20,2)
+        pygame.display.update()
+
+        if  nodo.izquierda:
+            dibujar_animacion_filtrar_combinada(ventana,nodo.izquierda,x - espacio, y+50 ,espacio//2,font,categoria,cantidad,precio_min,precio_max,raiz)
+        if nodo.derecha:
+            dibujar_animacion_filtrar_combinada(ventana,nodo.derecha,x + espacio, y+50, espacio//2,font,categoria,cantidad,precio_min,precio_max,raiz)
+    
+
+def validar_precio(nodo,precio_min,precio_max):
+    if precio_min != "" and precio_max !="":
+        return int(precio_min) <= nodo.producto.precio <= int(precio_max)   
+    return True   
+def validar_categoria(nodo,categoria):
+    if categoria !="":
+        return categoria == nodo.producto.categoria_producto   
+    return True   
+def validar_cantidad(nodo,cantidad):
+    if cantidad !="":
+        return int(cantidad) == nodo.producto.cantidad   
+    return True   
+
+
 
 def dibujar_animacion_filtrar(ventana,nodo,x,y,espacio,font,raiz,precio_min,precio_max,categoria):
     
@@ -55,8 +108,10 @@ def dibujar_animacion_filtrar(ventana,nodo,x,y,espacio,font,raiz,precio_min,prec
     time.sleep(1)
     if precio_min and precio_max:
         if (precio_min <= nodo.producto.precio <= precio_max):
-                ventana.fill((255,255,255))
                 ventana.blit(font.render(f'Nodo encontrado con un precio mayor que {precio_min} y un precio menor que {precio_max}' ,True,(0,0,0)),(30,30))
+                pygame.display.update()
+                time.sleep(2)
+                ventana.fill((255,255,255))
                 pintar_cuadro_informacion(ventana,font,nodo)
                 pygame.display.update()
                 time.sleep(5)
@@ -65,8 +120,10 @@ def dibujar_animacion_filtrar(ventana,nodo,x,y,espacio,font,raiz,precio_min,prec
                 pygame.display.update()
     elif categoria:
         if (nodo.producto.categoria_producto == categoria):
-                ventana.fill((255,255,255))
                 ventana.blit(font.render(f'Nodo encontrado con una categoria {categoria} con un id {nodo.producto.id}' ,True,(0,0,0)),(30,30))
+                pygame.display.update()
+                time.sleep(2)
+                ventana.fill((255,255,255))
                 pintar_cuadro_informacion(ventana,font,nodo)
                 pygame.display.update()
                 time.sleep(5)
@@ -85,7 +142,7 @@ def dibujar_animacion_filtrar(ventana,nodo,x,y,espacio,font,raiz,precio_min,prec
 
 def pintar_rectangulo_bordeado(ventana, rect, color, corner_radius):
     pygame.draw.rect(ventana, color, rect, border_radius=corner_radius)
-    pygame.draw.rect(ventana, (0, 0, 0), rect, 2, border_radius=corner_radius)
+    pygame.draw.rect(ventana, (0, 0, 0), rect, 2, border_radius= corner_radius)
 
 
 def pintar_cuadro_informacion(ventana,font,nodo):
@@ -109,11 +166,17 @@ def dibujar_nodo_main(ventana, nodo, x, y, espacio,font):
         # Dibujar líneas entre nodos
         if nodo.izquierda:
             pygame.draw.line(ventana, (0, 0, 0), (x, y), (x - espacio, y + 50), 2)
+            
         if nodo.derecha:
             pygame.draw.line(ventana, (0, 0, 0), (x, y), (x + espacio, y + 50), 2)
 
         # Dibujar nodo
-        pygame.draw.circle(ventana, (0, 128, 255), (x, y), 20)
+        if nodo.producto.cantidad == 0:
+            pygame.draw.circle(ventana, (70, 75, 57), (x, y), 20)
+           
+
+        else:
+            pygame.draw.circle(ventana, (0, 128, 255), (x, y), 20)
         pygame.draw.circle(ventana, (0, 0, 0), (x, y), 20, 2)
         texto = font.render(str(nodo.producto.id), True, (255, 255, 255))
         ventana.blit(texto, (x -6 , y - 10))

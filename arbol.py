@@ -50,10 +50,10 @@ class Arbol:
             n.izquierda=self._insertar(producto,n.izquierda,ventana,screen_info )  
         elif  producto.id > n.producto.id: 
             n.derecha=self._insertar(producto,n.derecha,ventana,screen_info )
-            if self.obtener_altura(n.derecha) == 1: 
-                ventana.fill((255, 255, 255))
-                dibujar_nodo(ventana,self.raiz,screen_info.current_w//2,150,120)      
-                time.sleep(1)
+        if self.obtener_altura(n.derecha) == 1 : 
+            ventana.fill((255, 255, 255))
+            dibujar_nodo(ventana,self.raiz,screen_info.current_w//2,150,120)      
+            time.sleep(1)
         # pintar
         return self.hacer_rotacion(producto,n,ventana,screen_info)
 
@@ -194,7 +194,7 @@ class Arbol:
     def buscar_nodo_por_id(self,id):
         nodo = self._buscar_nodo_por_id(self.raiz,id)
         if nodo:
-            return nodo.producto
+            return nodo
         return None
         
     # _buscar_nodo_por_id
@@ -292,32 +292,12 @@ class Arbol:
             nodo=nodos_derecha[len(nodos_derecha)-1]
         return self.hacer_rotacion(nodo.producto,n,ventana,screen_info)
 
-    def filtrar_precio(self,precio_min,precio_max):
-        nodos=[]
-        self._filtrar_precio(self.raiz,precio_min,precio_max,nodos)
-        return nodos
+    def  actualizar_atributos(self,nodo,cantidad,precio):
+        nodo.producto.cantidad=cantidad           
+        nodo.producto.precio=precio     
+
+
     
-    def _filtrar_precio(self,nodo,precio_min,precio_max,nodos):
-        if not nodo:
-            return
-        if precio_min <= nodo.producto.precio <= precio_max:
-            nodos.append(nodo)
-        self._filtrar_precio(nodo.izquierda,precio_min,precio_max,nodos)
-        self._filtrar_precio(nodo.derecha,precio_min,precio_max,nodos)
-        
-    # def filtrar_categoria(self,categoria):
-    #     productos=[]
-    #     self._filtrar_categoria(self.raiz,categoria)
-    #     return nodos    
-    
-    # def _filtrar_categoria(self,nodo,productos,categoria):
-    #     if not nodo:
-    #         return
-    #     if categoria == nodo.producto.categoria_producto:
-    #         productos.append(nodo.productos)
-    #     self._filtrar_categoria(nodo.izquierda,productos,categoria)
-    #     self._filtrar_categoria(nodo.derecha,productos,categoria)
-        
 arbol=Arbol()
 
 # producto1=Producto(1,"gelatina",1200,"comida")
