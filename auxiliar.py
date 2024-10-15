@@ -1,4 +1,6 @@
-import pygame, time
+import pygame, time, json
+from producto import Producto
+
 def dibujar_nodo(ventana, nodo, x, y, espacio, color=(0, 128, 255)):
     if nodo:
         # Dibujar líneas entre nodos
@@ -183,3 +185,68 @@ def dibujar_nodo_main(ventana, nodo, x, y, espacio,font):
         
         dibujar_nodo_main(ventana, nodo.izquierda, x - espacio, y + 50, espacio // 2,font)
         dibujar_nodo_main(ventana, nodo.derecha, x + espacio, y + 50, espacio // 2,font)
+
+def guardar_arbol_archivo(arbol, nombre):
+
+    print(arbol)
+    if not arbol:
+        pass
+    ruta_archivo = "arboles/"+nombre+".json"
+    datos= {}
+    datos["root"] = str(arbol.raiz.producto.id)
+
+    cola = [arbol.raiz.producto.id]
+
+    while cola:
+        actual = cola.pop(0)
+
+        nodo = arbol.buscar_nodo_por_id(actual)
+        producto = {
+            "cantidad": nodo.producto.cantidad,
+            "precio": nodo.producto.precio,
+            "categoria": nodo.producto.categoria_producto,
+            "nombre": nodo.producto.nombre_producto
+        }
+        datos[str(actual)]= {}
+        datos[str(actual)]["producto"] = producto
+        datos[str(actual)]["altura"] = nodo.altura
+        datos[str(actual)]["hijo_izquierdo"] = None
+        datos[str(actual)]["hijo_derecho"] = None
+        if nodo.izquierda:
+            datos[str(actual)]["hijo_izquierdo"] = str(nodo.izquierda.producto.id) 
+            cola.append(nodo.izquierda.producto.id)
+        if nodo.derecha:
+            datos[str(actual)]["hijo_derecho"] = str(nodo.derecha.producto.id) 
+            cola.append(nodo.derecha.producto.id)
+     
+    with open(ruta_archivo, 'w') as f:
+        json.dump(datos, f) 
+
+
+
+def cargar_arbol_archivo(ventana,screen_info, arbol, ruta_archivo):
+    arbol.raiz = None
+    with open(ruta_archivo, 'r') as f:
+        datos = json.load(f)
+        id_root= datos["root"]
+        cola = [id_root]
+
+        _cargar_arbol(ventana,screen_info, arbol,cola, datos)
+
+def _cargar_arbol(ventana,screen_info, arbol,cola, datos):
+
+    while cola:
+        actual = cola.pop(0)
+
+        datos_nodo = datos[actual]["producto"]
+        altura=datos[actual]["altura"]
+
+        nuevo_producto = Producto(cantidad=int(datos_nodo["cantidad"]), nombre_producto=datos_nodo["nombre"], precio=int(datos_nodo["precio"]), categoria_producto=datos_nodo["categoria"],id=int(actual))
+        arbol.insertar(nuevo_producto,ventana,screen_info)
+        print(actual,datos[actual])
+        if datos[actual]["hijo_izquierdo"]:
+            cola.append(datos[actual]["hijo_izquierdo"])
+        if datos[actual]["hijo_derecho"]:
+            cola.append(datos[actual]["hijo_derecho"])
+
+    

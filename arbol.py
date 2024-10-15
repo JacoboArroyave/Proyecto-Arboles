@@ -159,7 +159,7 @@ class Arbol:
         self._buscar_nodo_nombre(nombre_producto,n.izquierda,nodos)
         self._buscar_nodo_nombre(nombre_producto,n.derecha,nodos)
 
-
+    # inorder
     # Descripcion:Esta funcion recorrera el arbol en un algoritmo de busqueda en profundidad,
     # pero tiene la particularidad de que puede recorrer en inorder los subarboles del mismo.
     # Parametros:
@@ -185,12 +185,7 @@ class Arbol:
         nodos.append(n)
         self._inorder(n.derecha,nodos)
         
-    # buscar_nodo_padre
-    # Descripcion:Es el metodo privado de buscar_nodo_padre el cual nos sirve para buscar el nodo padre de un nodo,
-    # en caso de que sea la raiz devolvera la raiz.abs
-    # Parametros:
-    # id(int):el id del nodo al cual le buscaremos el padre
-
+   
     def buscar_nodo_por_id(self,id):
         nodo = self._buscar_nodo_por_id(self.raiz,id)
         if nodo:
@@ -214,7 +209,67 @@ class Arbol:
             return self._buscar_nodo_por_id(n.izquierda,id)  
 
 
-    def aux(self,n,ventana,screen_info):
+    #eliminar nodo
+    #descripcion: este es un algoritmo el cual recibe un id el cual identifica un nodo que sera eliminado,tambien se vera el proceso grafico de la eliminacion
+    #parametros:id(el id que sera eliminado)
+    #es_hacer_rotacion(es una variable boolena la cual servira para identificar si al arbol se le tiene que realizar la rotacion)
+    # ventana(es la ventana donde se esta mostrando todo la parte visual)
+    # screen_info(esta variable nos da las medidas de la pantalla para que en la hora de graficar sepamos referencias de el alto y ancho de la pantalla) 
+    def eliminar_nodo(self,id,es_hacer_rotacion,ventana,screen_info):
+        if es_hacer_rotacion:
+            ventana.fill((255, 255, 255))
+            dibujar_nodo(ventana,self.raiz,screen_info.current_w//2,150,120)      
+            time.sleep(1) 
+        self.raiz=self._eliminar_nodo(self.raiz,id,es_hacer_rotacion,ventana,screen_info)
+        #and self.balanceo   modificacion pero se mostrara en dos veces el mismo arbol
+        if es_hacer_rotacion :
+            ventana.fill((255, 255, 255))
+            dibujar_nodo(ventana,self.raiz,screen_info.current_w//2,150,120)      
+            time.sleep(1.5)
+            arbol.balanceo=False
+
+     #esta es la funcion privada elimnar_nodo,tambien es la encarada de realizar la recursion,tambien nos servira para mostrar la parte grafica        
+    def _eliminar_nodo(self,n,id,es_hacer_rotacion,ventana,screen_info):
+        if n is None:
+            return
+        if n.producto.id == id:
+            n=self.verificacion_caso_eliminar(n,ventana,screen_info)
+            
+        elif id > n.producto.id:
+            n.derecha=self._eliminar_nodo(n.derecha,id,es_hacer_rotacion,ventana,screen_info)              
+        elif id < n.producto.id:
+            n.izquierda=self._eliminar_nodo(n.izquierda,id,es_hacer_rotacion,ventana,screen_info)  
+           
+        if n:
+            n.altura= 1 + max(self.obtener_altura(n.izquierda),self.obtener_altura(n.derecha))
+            if es_hacer_rotacion:
+                if n.derecha and n.izquierda:
+                    if id == n.derecha.producto.id or id == n.izquierda.producto.id:
+                        ventana.fill((255, 255, 255))
+                        dibujar_nodo(ventana,n,screen_info.current_w//2,150,120)      
+                        time.sleep(1.5)
+                elif n.izquierda:
+                    if id == n.izquierda.producto.id:
+                        
+                        ventana.fill((255, 255, 255))
+                        dibujar_nodo(ventana,n,screen_info.current_w//2,150,120)      
+                        time.sleep(1.5)
+                elif n.derecha:
+                    if id == n.derecha.producto.id:
+                        ventana.fill((255, 255, 255))
+                        dibujar_nodo(ventana,n,screen_info.current_w//2,150,120)      
+                        time.sleep(1.5)
+                return self.hacer_rotacion_2(n,ventana,screen_info) 
+            
+        return n           
+    #verficacion_caso_eliminar:
+    #Descripcion:esta funcion es la encargada de saber si el nodo eliminar es una hoja,padre o un abuelo y a partir de eso realizara los procedimientos correspondientes 
+    #Parametros:
+    # n(representa el nodo que se realizaran las verificaciones)
+    # ventana(es la ventana donde se esta mostrando todo la parte visual) 
+    # screen_info(esta variable nos da las medidas de la pantalla para que en la hora de graficar sepamos referencias de el alto y ancho de la pantalla) 
+
+    def verificacion_caso_eliminar(self,n,ventana,screen_info):
         altura_n=self.obtener_altura(n)
         if altura_n == 1:
             return None
@@ -234,54 +289,9 @@ class Arbol:
            
         z.altura= 1 + max(self.obtener_altura(z.izquierda),self.obtener_altura(z.derecha))
         return z
-    def eliminar_nodo(self,id,boolean,ventana,screen_info):
-        if boolean:
-            ventana.fill((255, 255, 255))
-            dibujar_nodo(ventana,self.raiz,screen_info.current_w//2,150,120)      
-            time.sleep(1) 
-        self.raiz=self._eliminar_nodo(self.raiz,id,boolean,ventana,screen_info)
-        #and self.balanceo   modificacion pero se mostrara en dos veces el mismo arbol
-        if boolean :
-            ventana.fill((255, 255, 255))
-            dibujar_nodo(ventana,self.raiz,screen_info.current_w//2,150,120)      
-            time.sleep(1.5)
-            arbol.balanceo=False
-        
-
-    def _eliminar_nodo(self,n,id,boolean,ventana,screen_info):
-        if n is None:
-            return
-        if n.producto.id == id:
-            n=self.aux(n,ventana,screen_info)
-            
-        elif id > n.producto.id:
-            n.derecha=self._eliminar_nodo(n.derecha,id,boolean,ventana,screen_info)              
-        elif id < n.producto.id:
-            n.izquierda=self._eliminar_nodo(n.izquierda,id,boolean,ventana,screen_info)  
-           
-        if n:
-            n.altura= 1 + max(self.obtener_altura(n.izquierda),self.obtener_altura(n.derecha))
-            if boolean:
-                if n.derecha and n.izquierda:
-                    if id == n.derecha.producto.id or id == n.izquierda.producto.id:
-                        ventana.fill((255, 255, 255))
-                        dibujar_nodo(ventana,n,screen_info.current_w//2,150,120)      
-                        time.sleep(1.5)
-                elif n.izquierda:
-                    if id == n.izquierda.producto.id:
-                        
-                        ventana.fill((255, 255, 255))
-                        dibujar_nodo(ventana,n,screen_info.current_w//2,150,120)      
-                        time.sleep(1.5)
-                elif n.derecha:
-                    if id == n.derecha.producto.id:
-                        ventana.fill((255, 255, 255))
-                        dibujar_nodo(ventana,n,screen_info.current_w//2,150,120)      
-                        time.sleep(1.5)
-                return self.aux2(n,ventana,screen_info) 
-            
-        return n       
-    def aux2 (self,n,ventana,screen_info):
+    #hacer_rotacion:
+    #Descripcion:Este metedo
+    def hacer_rotacion_2 (self,n,ventana,screen_info):
         if self.obtener_altura(n)==1:
             return n
         if self.obtener_altura(n.izquierda) >= self.obtener_altura(n.derecha):
@@ -292,7 +302,7 @@ class Arbol:
             nodo=nodos_derecha[len(nodos_derecha)-1]
         return self.hacer_rotacion(nodo.producto,n,ventana,screen_info)
 
-    def  actualizar_atributos(self,nodo,cantidad,precio):
+    def actualizar_atributos(self,nodo,cantidad,precio):
         nodo.producto.cantidad=cantidad           
         nodo.producto.precio=precio     
 

@@ -8,6 +8,9 @@ from auxiliar import dibujar_animacion_filtrar
 from auxiliar import dibujar_animacion_filtrar_combinada    
 from auxiliar import pintar_rectangulo_bordeado
 from auxiliar import dibujar_nodo_main
+from auxiliar import cargar_arbol_archivo
+from auxiliar import guardar_arbol_archivo
+
 # import botones
 
 pygame.init()
@@ -66,6 +69,7 @@ filtrar_buscar_nombre = pygame.Rect(250, 90, 110, 40)
 actualizar_atributos_boton = pygame.Rect(481, 440, 140, 40)
 
 
+
 #botones formularios
 #mostrar fomulario de insertar producto
 mostrar_formulario_boton = pygame.Rect(50, 50, 240, 40)
@@ -75,6 +79,8 @@ mostrar_filtrar_precio_boton = pygame.Rect(50, 230 , 240, 40)
 mostrar_filtrar_categoria_boton = pygame.Rect(50, 290 , 240, 40)
 mostrar_filtrar_combinada_boton = pygame.Rect(50, 350 , 240, 40)
 mostrar_actualizar_datos = pygame.Rect(50, 410, 240, 40)
+guardar_arbol_boton=pygame.Rect(50,470, 240, 40)
+cargar_arbol_boton=pygame.Rect(50,530, 240, 40)
 volver_menu_boton = pygame.Rect(screen_width - 240, 20, 150, 40)
 
 formulario_visible_producto = False
@@ -85,6 +91,8 @@ formulario_visible_combinada = False
 formulario_visible_filtrar_precio = False
 formulario_visible_actualizar_datos = False
 actualizar_atributos = False
+cargar_arbol=False
+guardar_arbol=False
 
 nodo_a_actualizar=None
 
@@ -93,7 +101,8 @@ nodo_a_actualizar=None
 arbol = Arbol()
 raiz = arbol.raiz
 def manejar_eventos(event):
-    global raiz, formulario_visible_producto,formulario_visible_eliminar,formulario_visible_buscar_id,atributos_productos,formulario_visible_filtrar_precio,formulario_visible_categoria,productos_visibles,formulario_visible_combinada,formulario_visible_actualizar_datos,nodo_a_actualizar,actualizar_atributos                 
+    global guardar_arbol,cargar_arbol,raiz, formulario_visible_producto,formulario_visible_eliminar,formulario_visible_buscar_id,atributos_productos,formulario_visible_filtrar_precio,formulario_visible_categoria,productos_visibles,formulario_visible_combinada,formulario_visible_actualizar_datos,nodo_a_actualizar,actualizar_atributos                 
+    #este es el manejadoor de insertar
     for box in input_boxes_producto:
         if event.type == pygame.MOUSEBUTTONDOWN:
             if formulario_visible_producto:
@@ -187,7 +196,6 @@ def manejar_eventos(event):
             atributos_productos["Cantidad"]=""
 
             input_box_buscar_id["text"]=""
-
 
     if input_box_buscar_id["active"] and formulario_visible_buscar_id and event.type == pygame.KEYDOWN :
 
@@ -324,6 +332,7 @@ def manejar_eventos(event):
     for box in input_boxes_actualizar:
         if event.type == pygame.MOUSEBUTTONDOWN:
             if actualizar_atributos:
+                
               box["active"]=box["rect"].collidepoint(event.pos) 
               if actualizar_atributos_boton.collidepoint(event.pos):
                 cantidad =input_boxes_actualizar[0]["text"]
@@ -342,31 +351,29 @@ def manejar_eventos(event):
             else:   
                 box["text"] += event.unicode    
 
+    if event.type == pygame.MOUSEBUTTONDOWN:
+        if cargar_arbol_boton.collidepoint(event.pos):
+            cargar_arbol = True
+        if cargar_arbol:
+            cargar_arbol_archivo(ventana,screen_info ,arbol, "arboles/arbol2.json")
+            raiz=arbol.raiz
+            cargar_arbol=False
 
-    # for box in input_boxes_actualizar:
-    #     if event.type == pygame.MOUSEBUTTONDOWN:
-    #         if,formulario_visible_actualizar_datos:
-    #             box["active"]=box["rect"].collidepoint(event.pos)
-    #             if filtrar_combinada_boton.collidepoint(event.pos):
-    #                 precio = (input_boxes_actualizar[0]["text"])
-    #                 cantidad= (input_boxes_actualizar[1]["text"])
+        # if volver_menu_boton.collidepoint(event.pos) :
+        #     cargar_arbol = False
+    if event.type == pygame.MOUSEBUTTONDOWN:
+        if guardar_arbol_boton.collidepoint(event.pos):
+            guardar_arbol = True
+        if guardar_arbol:
+            nombre = "arbol2"
+            guardar_arbol_archivo(arbol,nombre)
+            raiz=arbol.raiz
+            guardar_arbol=False
 
-    #                ,formulario_visible_actualizar_datos=False
-    #                 for box in input_boxes_actualizar:
-    #                     box["text"] = ""
-    #         if mostrar_actualizar_atributos.collidepoint(event.pos):
-    #            ,formulario_visible_actualizar_datos=True
+        # if volver_menu_boton.collidepoint(event.pos) :
+        #     guardar_arbol = False
 
-    #         if volver_menu_boton.collidepoint(event.pos):
-    #            ,formulario_visible_actualizar_datos = False
-    #     if box["active"] and,formulario_visible_actualizar_datos and event.type == pygame.KEYDOWN :
-    #         if event.key == pygame.K_RETURN:
-    #             box["active"] = False
-    #         elif event.key == pygame.K_BACKSPACE:
-    #             box["text"] = box["text"][:-1]
-    #         else:   
-    #             box["text"] += event.unicode
-
+    
     
     
 running = True  
@@ -522,8 +529,15 @@ while running:
         pintar_rectangulo_bordeado(ventana, mostrar_actualizar_datos, (0, 128, 0), 10)
         ventana.blit(font.render("Actualizar datos", True, (255, 255, 255)), (mostrar_actualizar_datos.x +5, mostrar_actualizar_datos.y + 8))
 
+        pintar_rectangulo_bordeado(ventana, guardar_arbol_boton, (0, 128, 0), 10)
+        ventana.blit(font.render("Guardar el arbol", True, (255, 255, 255)), (guardar_arbol_boton.x +5, guardar_arbol_boton.y + 8))
+    
+        pintar_rectangulo_bordeado(ventana, cargar_arbol_boton, (0, 128, 0), 10)
+        ventana.blit(font.render("Cargar arbol", True, (255, 255, 255)), (cargar_arbol_boton.x +5, cargar_arbol_boton.y + 8))
+    
     if not formulario_visible_buscar_id and not actualizar_atributos:
-        dibujar_nodo_main(ventana, raiz, (screen_width // 2)+100, 150, 120,font)
-    pygame.display.update()
+        dibujar_nodo_main(ventana, arbol.raiz, (screen_width // 2)+100, 150, 120,font)
+    pygame.display.update() 
+           
     
 pygame.quit()
