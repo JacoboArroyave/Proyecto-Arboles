@@ -1,6 +1,12 @@
 import pygame, time, json
 from producto import Producto
-
+#dibujar_nodo
+#Descripcion:Esta funcion es la funcion recursiva de dibiujar el arbol, se diferencia de la otra que se muestra "paso por paso"
+#Parametros:
+# ventana(es la ventana donde se esta mostrando todo la parte visual) 
+#x,y(Las poscicion donde se dibujara el circulo y hace referencia a el centro del circulo)
+#espacio(Es el espacio que se dejarfa entre el nodo padre y los hijos)
+#color(es por defecto un especie de azul y indicara el color del nodo, cuando el producrto tenga stock 0 se pintara de otro color)
 def dibujar_nodo(ventana, nodo, x, y, espacio, color=(0, 128, 255)):
     if nodo:
         # Dibujar líneas entre nodos
@@ -16,7 +22,15 @@ def dibujar_nodo(ventana, nodo, x, y, espacio, color=(0, 128, 255)):
         dibujar_nodo(ventana, nodo.derecha, x + espacio, y + 50, espacio // 2, color)
         dibujar(ventana,nodo,x,y,espacio,color)
         pygame.display.update()
-
+#dibuja
+#decripcion:Este es el encargado de pintar la apariencia del nodo
+#Parametros:
+# ventana(es la ventana donde se esta mostrando todo la parte visual) 
+#nodo(el nodo que se pintara)
+#x,y(Las poscicion donde se dibujara el circulo y hace referencia a el centro del circulo)
+#espacio(Es el espacio que se dejarfa entre el nodo padre y los hijos)
+#color(es por defecto un especie de azul y indicara el color del nodo, cuando el producrto tenga stock 0 se pintara de otro color)
+#borde(es por defecto un especie de rojo y indicara el borde del nodo)
     
 def dibujar(ventana, nodo, x, y, espacio, color, borde=(0,0,0)):
     font = pygame.font.Font(None, 32)
@@ -30,8 +44,14 @@ def dibujar(ventana, nodo, x, y, espacio, color, borde=(0,0,0)):
     pygame.display.update()
     time.sleep(0.2)
         
-    
-
+#dijar_animacion_buscar_id
+#Descripcion:Esta funcion busca un solo id
+# ventana(es la ventana donde se esta mostrando todo la parte visual) 
+#nodo(el nodo que se pintara)
+#x,y(Las poscicion donde se dibujara el circulo y hace referencia a el centro del circulo)
+#espacio(Es el espacio que se dejarfa entre el nodo padre y los hijos)
+#font(hace referencia a la fuente)
+#id(El id el cual sera buscado)
 def dibujar_animacion_buscar_id(ventana,nodo,x,y,espacio,font,id):
     if nodo:
         pygame.draw.circle(ventana,(255,0,0),(x,y),20,2)
@@ -53,6 +73,18 @@ def dibujar_animacion_buscar_id(ventana,nodo,x,y,espacio,font,id):
         else:
             return dibujar_animacion_buscar_id(ventana,nodo.izquierda,x - espacio, y+50, espacio//2,font,id)
     return False
+
+#dibujar_animacion_filtrar_combinada
+#Descripcion:esta funcion buscara los productos que cumplan con ciertos criterios
+# Parametros:
+# ventana(es la ventana donde se esta mostrando todo la parte visual) 
+#nodo(el nodo que se pintara)
+#x,y(Las poscicion donde se dibujara el circulo y hace referencia a el centro del circulo)
+#espacio(Es el espacio que se dejarfa entre el nodo padre y los hijos)
+#font(hace referencia a la fuente)
+#categoria,cantidad,precio_min,precio_max(Estos son los criterios por los que filtrara)
+#raiz(Es la raiz del arbol y empazara e indica pro donde empezara el recorrido)
+
 def dibujar_animacion_filtrar_combinada(ventana,nodo,x,y,espacio,font,categoria,cantidad,precio_min,precio_max,raiz):
         pygame.draw.circle(ventana,(255,0,0),(x,y),20,2)
         pygame.display.update()
@@ -61,13 +93,16 @@ def dibujar_animacion_filtrar_combinada(ventana,nodo,x,y,espacio,font,categoria,
         font_texto = pygame.font.Font(None, 25)
         if validar_precio(nodo,precio_min,precio_max) and validar_categoria(nodo,categoria) and validar_cantidad(nodo,cantidad):
             if validar_precio(nodo,precio_min,precio_max):
-                ventana.blit(font_texto.render(f'Nodo encontrado con un precio mayor que {precio_min} y un precio menor que {precio_max}' ,True,(0,0,0)),(30,y_texto))
+                if precio_min != "":
+                    ventana.blit(font_texto.render(f'Nodo encontrado con un precio mayor que {precio_min} y un precio menor que {precio_max}' ,True,(0,0,0)),(30,y_texto))
                 y_texto+=30
             if validar_categoria(nodo,categoria):
-                ventana.blit(font_texto.render(f'Nodo encontrado con una categoria {categoria}' ,True,(0,0,0)),(30,y_texto))
+                if categoria !=:
+                    ventana.blit(font_texto.render(f'Nodo encontrado con una categoria {categoria}' ,True,(0,0,0)),(30,y_texto))
                 y_texto+=30
             if validar_cantidad(nodo,cantidad):
-                ventana.blit(font_texto.render(f'Nodo encontrado con una cantidad {cantidad}' ,True,(0,0,0)),(30,y_texto))
+                if cantidad != ""
+                    ventana.blit(font_texto.render(f'Nodo encontrado con una cantidad {cantidad}' ,True,(0,0,0)),(30,y_texto))
                 y_texto+=30
             pygame.display.update()
             time.sleep(3)
@@ -87,21 +122,52 @@ def dibujar_animacion_filtrar_combinada(ventana,nodo,x,y,espacio,font,categoria,
         if nodo.derecha:
             dibujar_animacion_filtrar_combinada(ventana,nodo.derecha,x + espacio, y+50, espacio//2,font,categoria,cantidad,precio_min,precio_max,raiz)
     
+#validar_precio
+#desciprcion:Este metodo validara que validar precio sea uno de los criterios 
+# para filtrar por varios atributos y tambien validara que se cumpla la condicion
+#Parametros:
+#nodo(Es aquel que se le verificara la condicion)
+#precio_min,precio_max(son las condiciones a validar)
 
 def validar_precio(nodo,precio_min,precio_max):
     if precio_min != "" and precio_max !="":
         return int(precio_min) <= nodo.producto.precio <= int(precio_max)   
     return True   
+#validar_categoria
+#desciprcion:Este metodo validara que validar categoria sea uno de los criterios 
+# para filtrar por varios atributos y tambien validara que se cumpla la condicion
+#Parametros:
+#nodo(Es aquel que se le verificara la condicion)
+#categoria(son las condiciones a validar)
+
 def validar_categoria(nodo,categoria):
     if categoria !="":
         return categoria == nodo.producto.categoria_producto   
-    return True   
+    return True
+
+#validar_cantidad
+#desciprcion:Este metodo validara que validar cantidad sea uno de los criterios 
+# para filtrar por varios atributos y tambien validara que se cumpla la condicion
+#Parametros:
+#nodo(Es aquel que se le verificara la condicion)
+#cantidad(son las condiciones a validar)
+   
 def validar_cantidad(nodo,cantidad):
     if cantidad !="":
         return int(cantidad) == nodo.producto.cantidad   
     return True   
 
 
+#dibujar_animacion_filtrar
+#Descripcion:esta funcion buscara los productos que cumplan con ciertos criterios,filtrara popr precio o por categoria
+# Parametros:
+# ventana(es la ventana donde se esta mostrando todo la parte visual) 
+#nodo(el nodo que se pintara)
+#x,y(Las poscicion donde se dibujara el circulo y hace referencia a el centro del circulo)
+#espacio(Es el espacio que se dejarfa entre el nodo padre y los hijos)
+#font(hace referencia a la fuente)
+#raiz(Es la raiz del arbol y empazara e indica pro donde empezara el recorrido)
+#categoria,precio_min,precio_max(Estos son los criterios por los que filtrara)
 
 def dibujar_animacion_filtrar(ventana,nodo,x,y,espacio,font,raiz,precio_min,precio_max,categoria):
     
@@ -141,10 +207,22 @@ def dibujar_animacion_filtrar(ventana,nodo,x,y,espacio,font,raiz,precio_min,prec
     if nodo.derecha:
         dibujar_animacion_filtrar(ventana,nodo.derecha,x + espacio, y+50 ,espacio//2,font,raiz,precio_min,precio_max,categoria)
 
+#pintar_rectangulo_bordeado
+#descripcion:es el encargado de que las cajas de texto o lo botones tengan una apariencia bordeada
+# ventana(es la ventana donde se esta mostrando todo la parte visual) 
+#rect(son las dimensiones de la caja o los botones)
+#color(represntara de que color sewera pintado la caja)
 
 def pintar_rectangulo_bordeado(ventana, rect, color, corner_radius):
     pygame.draw.rect(ventana, color, rect, border_radius=corner_radius)
     pygame.draw.rect(ventana, (0, 0, 0), rect, 2, border_radius= corner_radius)
+
+#pintar_cuadro_informativo
+#descripcion:pinta uin cuiadron grande con los atributos de el producto
+#parametros:
+# ventana(es la ventana donde se esta mostrando todo la parte visual) 
+#font(representa la fuente delk texto)
+#nodo(es que aque nodo que se le obtendram los atributos de el producto)
 
 
 def pintar_cuadro_informacion(ventana,font,nodo):
@@ -163,6 +241,15 @@ def pintar_cuadro_informacion(ventana,font,nodo):
     ventana.blit(font.render("Categoria del producto:",True,(0,0,0)),(495,370)) 
     ventana.blit(font.render(nodo.producto.categoria_producto,True,(0,0,0)),(750,370)) 
 
+#dibujar_nodo_main
+#descriopcio:este metodo dibuja el arbol sin animaciones
+#parametros:
+# ventana(es la ventana donde se esta mostrando todo la parte visual) 
+#nodo(el nodo que se dibujara)
+#x,y(Las poscicion donde se dibujara el circulo y hace referencia a el centro del circulo)
+#espacio(Es el espacio que se dejara entre el nodo padre y los hijos)
+#font(hace referencia a la fuente)
+
 def dibujar_nodo_main(ventana, nodo, x, y, espacio,font):
     if nodo:
         # Dibujar líneas entre nodos
@@ -175,8 +262,6 @@ def dibujar_nodo_main(ventana, nodo, x, y, espacio,font):
         # Dibujar nodo
         if nodo.producto.cantidad == 0:
             pygame.draw.circle(ventana, (70, 75, 57), (x, y), 20)
-           
-
         else:
             pygame.draw.circle(ventana, (0, 128, 255), (x, y), 20)
         pygame.draw.circle(ventana, (0, 0, 0), (x, y), 20, 2)
@@ -186,9 +271,13 @@ def dibujar_nodo_main(ventana, nodo, x, y, espacio,font):
         dibujar_nodo_main(ventana, nodo.izquierda, x - espacio, y + 50, espacio // 2,font)
         dibujar_nodo_main(ventana, nodo.derecha, x + espacio, y + 50, espacio // 2,font)
 
-def guardar_arbol_archivo(arbol, nombre):
 
-    print(arbol)
+#guardar_arbol
+#descripcion:este metodo guardara los arboles que el usuario quiera en formato json
+#parametros:
+#arbol(es el arbol avl)
+#nombre(nombre del arcchivo que el usaurio le puso)
+def guardar_arbol_archivo(arbol, nombre):
     if not arbol:
         pass
     ruta_archivo = "arboles/"+nombre+".json"
@@ -222,17 +311,28 @@ def guardar_arbol_archivo(arbol, nombre):
     with open(ruta_archivo, 'w') as f:
         json.dump(datos, f) 
 
+#cargar_arbol_archivo
+#parametros:
+# ventana(es la ventana donde se esta mostrando todo la parte visual) 
+#arbol(es el arbol avl)
+#nombre(nombre del arcchivo que el usaurio le puso)
 
 
-def cargar_arbol_archivo(ventana,screen_info, arbol, ruta_archivo):
+def cargar_arbol_archivo(ventana,screen_info, arbol, nombre):
     arbol.raiz = None
-    with open(ruta_archivo, 'r') as f:
-        datos = json.load(f)
-        id_root= datos["root"]
-        cola = [id_root]
+    ruta_archivo = "arboles/"+nombre+".json"
+    font = pygame.font.Font(None, 32)
+    try:
+        with open(ruta_archivo, 'r') as f:
+            datos = json.load(f)
+            id_root= datos["root"]
+            cola = [id_root]
+            _cargar_arbol(ventana,screen_info, arbol,cola, datos)
 
-        _cargar_arbol(ventana,screen_info, arbol,cola, datos)
-
+    except FileNotFoundError:
+        ventana.blit(font.render(f'El archivo no esxistente' ,True,(0,0,0)),(screen_info.current_w//2,screen_info.current_h//2))
+        pygame.display.update()
+        time.sleep(1)
 def _cargar_arbol(ventana,screen_info, arbol,cola, datos):
 
     while cola:
@@ -243,7 +343,6 @@ def _cargar_arbol(ventana,screen_info, arbol,cola, datos):
 
         nuevo_producto = Producto(cantidad=int(datos_nodo["cantidad"]), nombre_producto=datos_nodo["nombre"], precio=int(datos_nodo["precio"]), categoria_producto=datos_nodo["categoria"],id=int(actual))
         arbol.insertar(nuevo_producto,ventana,screen_info)
-        print(actual,datos[actual])
         if datos[actual]["hijo_izquierdo"]:
             cola.append(datos[actual]["hijo_izquierdo"])
         if datos[actual]["hijo_derecho"]:

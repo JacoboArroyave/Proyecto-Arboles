@@ -4,7 +4,6 @@ import random
 class Producto:
     contador_id=1
     def __init__(self,cantidad,nombre_producto,precio,categoria_producto, id=-1):
-        print(cantidad,nombre_producto,precio,categoria_producto, id)
         if id!=-1:
             Producto.contador_id=id
        

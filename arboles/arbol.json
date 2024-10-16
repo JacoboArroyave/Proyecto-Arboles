@@ -1,46 +1,46 @@
 {
     "root": "2",
     "2": {
-        "altura": 3,
         "producto": {
-            "cantidad": 2,
-            "precio": 2,
-            "categoria": "comida",
-            "nombre": "Gelatina"
+            "cantidad": 1,
+            "precio": 1,
+            "categoria": "1",
+            "nombre": "1"
         },
+        "altura": 3,
         "hijo_izquierdo": "1",
         "hijo_derecho": "3"
     },
     "1": {
-        "altura": 1,
         "producto": {
             "cantidad": 1,
-            "precio": 1,
+            "precio": 1200,
             "categoria": "comida",
-            "nombre": "Gelatina"
+            "nombre": "gelatina"
         },
+        "altura": 1,
         "hijo_izquierdo": null,
         "hijo_derecho": null
     },
     "3": {
-        "altura": 2,
         "producto": {
-            "cantidad": 3,
-            "precio": 3,
-            "categoria": "comida",
-            "nombre": "Gelatina"
+            "cantidad": 1,
+            "precio": 1,
+            "categoria": "1",
+            "nombre": "1"
         },
+        "altura": 2,
         "hijo_izquierdo": null,
         "hijo_derecho": "4"
     },
     "4": {
-        "altura": 1,
         "producto": {
-            "cantidad": 4,
-            "precio": 4,
-            "categoria": "comida",
-            "nombre": "Gelatina"
+            "cantidad": 1,
+            "precio": 1,
+            "categoria": "1",
+            "nombre": "1"
         },
+        "altura": 1,
         "hijo_izquierdo": null,
         "hijo_derecho": null
     }

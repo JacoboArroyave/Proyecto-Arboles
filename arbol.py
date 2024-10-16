@@ -28,7 +28,9 @@ class Arbol:
             self.raiz=Nodo(producto)
         else:
             self.raiz=self._insertar(producto,self.raiz,ventana,screen_info )
+            
             if self.balanceo:
+                print("hla")
                 ventana.fill((255, 255, 255))
                 dibujar_nodo(ventana,self.raiz,screen_info.current_w//2,150,120)      
                 time.sleep(0.2)
@@ -72,10 +74,10 @@ class Arbol:
         if balance > 1 and producto.id > n.izquierda.producto.id:
             n.izquierda=self.rotacion_izquierda(n.izquierda,ventana,screen_info)
             self.balanceo = True
-            return self.rotacion_derecha(n)
+            return self.rotacion_derecha(n, ventana,screen_info)
 
         if balance < -1 and producto.id < n.derecha.producto.id:
-            n.derecha=self.rotacion_derecha(n.derecha)
+            n.derecha=self.rotacion_derecha(n.derecha, ventana,screen_info)
             self.balanceo = True
             return self.rotacion_izquierda(n, ventana,screen_info)  
         return n
@@ -101,10 +103,7 @@ class Arbol:
         #Actualizamos las alturas de n y z porque con esta rotacion son las que se ven afectadas
         n.altura=1 + max(self.obtener_altura(n.izquierda),self.obtener_altura(n.derecha))
         z.altura=1 + max(self.obtener_altura(z.izquierda),self.obtener_altura(z.derecha))
-        if n is not self.raiz:
-            ventana.fill((255, 255, 255))
-            dibujar_nodo(ventana,z,screen_info.current_w//2,150,120)      
-            time.sleep(1)
+
         return z
 
     # Rotacion_derecha
@@ -114,7 +113,7 @@ class Arbol:
     # n(Nodo):Representa la raiz del arbol o subarbol al cual se le aplicara la rotacion
     # Return:Retorna una rotacion simple a la derecha al arbol o subarbol correspondiente        
 
-    def rotacion_derecha(self,n):
+    def rotacion_derecha(self,n, ventana,screen_info):
         z=n.izquierda
         t=z.derecha
         #Aqui se hacen la rotaciones 
@@ -222,16 +221,23 @@ class Arbol:
             time.sleep(1) 
         self.raiz=self._eliminar_nodo(self.raiz,id,es_hacer_rotacion,ventana,screen_info)
         #and self.balanceo   modificacion pero se mostrara en dos veces el mismo arbol
-        if es_hacer_rotacion :
+        if es_hacer_rotacion and self.balanceo:
+            self.balanceo=False
             ventana.fill((255, 255, 255))
             dibujar_nodo(ventana,self.raiz,screen_info.current_w//2,150,120)      
             time.sleep(1.5)
-            arbol.balanceo=False
+            self.balanceo=False
 
      #esta es la funcion privada elimnar_nodo,tambien es la encarada de realizar la recursion,tambien nos servira para mostrar la parte grafica        
     def _eliminar_nodo(self,n,id,es_hacer_rotacion,ventana,screen_info):
         if n is None:
             return
+        id_hijo_izquierdo=None
+        id_hijo_derecho=None
+        if n.izquierda:
+            id_hijo_izquierdo=n.izquierda.producto.id
+        if n.derecha:
+            id_hijo_derecho=n.derecha.producto.id
         if n.producto.id == id:
             n=self.verificacion_caso_eliminar(n,ventana,screen_info)
             
@@ -243,23 +249,20 @@ class Arbol:
         if n:
             n.altura= 1 + max(self.obtener_altura(n.izquierda),self.obtener_altura(n.derecha))
             if es_hacer_rotacion:
-                if n.derecha and n.izquierda:
-                    if id == n.derecha.producto.id or id == n.izquierda.producto.id:
-                        ventana.fill((255, 255, 255))
-                        dibujar_nodo(ventana,n,screen_info.current_w//2,150,120)      
-                        time.sleep(1.5)
-                elif n.izquierda:
-                    if id == n.izquierda.producto.id:
-                        
-                        ventana.fill((255, 255, 255))
-                        dibujar_nodo(ventana,n,screen_info.current_w//2,150,120)      
-                        time.sleep(1.5)
-                elif n.derecha:
-                    if id == n.derecha.producto.id:
-                        ventana.fill((255, 255, 255))
-                        dibujar_nodo(ventana,n,screen_info.current_w//2,150,120)      
-                        time.sleep(1.5)
-                return self.hacer_rotacion_2(n,ventana,screen_info) 
+                if id == id_hijo_izquierdo or id == id_hijo_derecho:
+                    ventana.fill((255, 255, 255))
+                    dibujar_nodo(ventana,self.raiz,screen_info.current_w//2,150,120)      
+                    time.sleep(1.5)
+                elif id ==id_hijo_izquierdo:
+                    print("holas")
+                    ventana.fill((255, 255, 255))
+                    dibujar_nodo(ventana,self.raiz,screen_info.current_w//2,150,120)      
+                    time.sleep(1.5)
+                elif id ==id_hijo_derecho:
+                    ventana.fill((255, 255, 255))
+                    dibujar_nodo(ventana,self.raiz,screen_info.current_w//2,150,120)      
+                    time.sleep(1.5)
+                return self.obtener_mayor_id_sub_i(n,ventana,screen_info) 
             
         return n           
     #verficacion_caso_eliminar:
@@ -287,11 +290,17 @@ class Arbol:
             z.derecha=n.derecha
            
            
+           
         z.altura= 1 + max(self.obtener_altura(z.izquierda),self.obtener_altura(z.derecha))
         return z
-    #hacer_rotacion:
-    #Descripcion:Este metedo
-    def hacer_rotacion_2 (self,n,ventana,screen_info):
+    #obtener_mayor_id_sub_i:
+    #Descripcion:Este es un metodo que calcula el mayor hijo del sub arbol izquierdo o del sub arbol derecho para poder llamar la funcuion de hacer rotacion
+    #Parametros:
+    # (n):el padre de este subarbol 
+    # ventana(es la ventana donde se esta mostrando todo la parte visual) 
+    # screen_info(esta variable nos da las medidas de la pantalla para que en la hora de graficar sepamos referencias de el alto y ancho de la pantalla) 
+
+    def obtener_mayor_id_sub_i (self,n,ventana,screen_info):
         if self.obtener_altura(n)==1:
             return n
         if self.obtener_altura(n.izquierda) >= self.obtener_altura(n.derecha):
@@ -299,43 +308,19 @@ class Arbol:
             nodo=nodos_izquierda[len(nodos_izquierda)-1]
         elif self.obtener_altura(n.izquierda) < self.obtener_altura(n.derecha):
             nodos_derecha=self.inorder(n.derecha)
-            nodo=nodos_derecha[len(nodos_derecha)-1]
-        return self.hacer_rotacion(nodo.producto,n,ventana,screen_info)
-
+            nodo=nodos_derecha[0]
+        nodo_balanceado =self.hacer_rotacion(nodo.producto,n,ventana,screen_info)
+        return nodo_balanceado
+    #actualizar_atributos
+    #Descripcioon:Ester metodo actualizara los atributos de un nodo:
+    #Parametros :
+    #(nodo):El nodo que se le actualizaeran los atributos de un nodo
+    #(cantidad,precio):los nuevos atributos a ingresar 
     def actualizar_atributos(self,nodo,cantidad,precio):
-        nodo.producto.cantidad=cantidad           
-        nodo.producto.precio=precio     
+        if cantidad != "": 
+            nodo.producto.cantidad=int(cantidad)           
+        if precio != "":
+            nodo.producto.precio=int(precio)   
 
 
     
-arbol=Arbol()
-
-# producto1=Producto(1,"gelatina",1200,"comida")
-# producto2=Producto(1,"gelatina",1200,"comida")
-# producto3=Producto(1,"gelatina",1200,"comida")
-# producto4=Producto(1,"gelatina",1200,"comida")
-# producto5=Producto(1,"gelatina",1200,"comida")
-# producto6=Producto(1,"gelatina",1200,"comida")
-# producto7=Producto(1,"gelatina",1200,"comida")
-
-# arbol.insertar(producto1)   
-# arbol.insertar(producto2)   
-# arbol.insertar(producto3)   
-# arbol.insertar(producto4)   
-# arbol.insertar(producto5)   
-# arbol.insertar(producto6)   
-# arbol.insertar(producto7) 
-
-# print(arbol.raiz.producto.id,"soy raiz ")
-# arbol.eliminar_nodo(2,1)
-# print(arbol.raiz.producto.id,"soy raiz ")
-# arbol.inorder(arbol.raiz)
-# nodos=arbol.filtrar_precio(1000,1300)
-# for m in nodos:
-#     print(m)
-# n=arbol.buscar_nodo_nombre("gelatina")[0]
-# arbol.raiz=Nodo(producto6)
-# print(arbol.buscar_nodo_padre(5).producto.nombre_producto)
-
-
-

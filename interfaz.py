@@ -47,6 +47,8 @@ input_box_eliminar ={"rect": pygame.Rect(190, 50, 200, 30), "color": (230, 230, 
 input_box_buscar_id = {"rect": pygame.Rect(190, 50, 200, 30), "color": (230, 230, 230), "active": False, "text": ""}
 input_box_categoria = {"rect": pygame.Rect(250, 50, 200, 30), "color": (230, 230, 230), "active": False, "text": ""}
 input_box_nombre = {"rect": pygame.Rect(250, 50, 200, 30), "color": (230, 230, 230), "active": False, "text": ""}
+input_box_nombre_archivo_guardar = {"rect": pygame.Rect(340, 50, 200, 30), "color": (230, 230, 230), "active": False, "text": ""}
+input_box_nombre_archivo_cargar = {"rect": pygame.Rect(340, 50, 200, 30), "color": (230, 230, 230), "active": False, "text": ""}
 
 # texto de los inputs
 input_labels_producto = [ "Nombre producto:","Cantidad:", "Precio:", "Categoría Producto:"]
@@ -67,6 +69,8 @@ filtrar_categoria_boton = pygame.Rect(250, 90, 110, 40)
 filtrar_combinada_boton = pygame.Rect(250, 240, 110, 40)
 filtrar_buscar_nombre = pygame.Rect(250, 90, 110, 40)
 actualizar_atributos_boton = pygame.Rect(481, 440, 140, 40)
+guardar_arbol_boton = pygame.Rect(340,100 , 140, 40)
+cargar_arbol_boton = pygame.Rect(340,100 , 140, 40)
 
 
 
@@ -79,8 +83,8 @@ mostrar_filtrar_precio_boton = pygame.Rect(50, 230 , 240, 40)
 mostrar_filtrar_categoria_boton = pygame.Rect(50, 290 , 240, 40)
 mostrar_filtrar_combinada_boton = pygame.Rect(50, 350 , 240, 40)
 mostrar_actualizar_datos = pygame.Rect(50, 410, 240, 40)
-guardar_arbol_boton=pygame.Rect(50,470, 240, 40)
-cargar_arbol_boton=pygame.Rect(50,530, 240, 40)
+mostrar_guardar_arbol_boton=pygame.Rect(50,470, 240, 40)
+mostrar_cargar_arbol_boton=pygame.Rect(50,530, 240, 40)
 volver_menu_boton = pygame.Rect(screen_width - 240, 20, 150, 40)
 
 formulario_visible_producto = False
@@ -99,9 +103,48 @@ nodo_a_actualizar=None
 
 
 arbol = Arbol()
-raiz = arbol.raiz
+
 def manejar_eventos(event):
-    global guardar_arbol,cargar_arbol,raiz, formulario_visible_producto,formulario_visible_eliminar,formulario_visible_buscar_id,atributos_productos,formulario_visible_filtrar_precio,formulario_visible_categoria,productos_visibles,formulario_visible_combinada,formulario_visible_actualizar_datos,nodo_a_actualizar,actualizar_atributos                 
+    global guardar_arbol,cargar_arbol, formulario_visible_producto,formulario_visible_eliminar,formulario_visible_buscar_id,atributos_productos,formulario_visible_filtrar_precio,formulario_visible_categoria,productos_visibles,formulario_visible_combinada,formulario_visible_actualizar_datos,nodo_a_actualizar,actualizar_atributos                 
+    
+    #filtrar precio
+    for box in input_boxes_filtrar_precio:
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if formulario_visible_filtrar_precio:
+                box["active"] = box["rect"].collidepoint(event.pos)
+                if filtrar_precio_boton.collidepoint(event.pos):
+                    precio_min = input_boxes_filtrar_precio[0]["text"]
+                    precio_max = input_boxes_filtrar_precio[1]["text"]
+
+                    if precio_min and precio_max and precio_min < precio_max:
+                        try:
+                            formulario_visible_filtrar_precio = False
+                            precio_min=int(precio_min)
+                            precio_max=int(precio_max)
+                            ventana.fill((255,255,255))
+                            dibujar_nodo_main(ventana, arbol.raiz, (screen_width // 2), 150, 120,font)
+                            animacion=dibujar_animacion_filtrar(ventana,arbol.raiz,(screen_width // 2), 150, 120,font,arbol.raiz,precio_min,precio_max,None)
+                            for box in input_boxes_filtrar_precio:
+                                box["text"] = ""
+                        except ValueError:
+                            print("Error")
+                    else:   
+                        print("Todos los campos deben estar llenos")
+            if mostrar_filtrar_precio_boton.collidepoint(event.pos) and not formulario_visible_producto and not formulario_visible_eliminar and not formulario_visible_buscar_id and not formulario_visible_categoria and not formulario_visible_combinada  and not formulario_visible_actualizar_datos and not actualizar_atributos :
+
+                formulario_visible_filtrar_precio = True
+
+            if volver_menu_boton.collidepoint(event.pos):
+                formulario_visible_filtrar_precio = False
+
+        if box["active"] and formulario_visible_filtrar_precio and event.type == pygame.KEYDOWN :
+            if event.key == pygame.K_RETURN:
+                box["active"] = False
+            elif event.key == pygame.K_BACKSPACE:
+                box["text"] = box["text"][:-1]
+            else:   
+                box["text"] += event.unicode
+   
     #este es el manejadoor de insertar
     for box in input_boxes_producto:
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -120,7 +163,7 @@ def manejar_eventos(event):
                         precio = int(precio_text)
                         nuevo_producto = Producto(cantidad, nombre, precio, categoria)
                         arbol.insertar(nuevo_producto,ventana,screen_info )
-                        raiz = arbol.raiz
+                        
                         for box in input_boxes_producto:
                             box["text"] = "1"
                     else:
@@ -148,7 +191,7 @@ def manejar_eventos(event):
                 if id:
                     formulario_visible_eliminar=False
                     arbol.eliminar_nodo(int(id),1,ventana,screen_info)
-                    raiz=arbol.raiz
+                    
 
         if mostrar_eliminar_boton.collidepoint(event.pos) and not formulario_visible_producto  and not formulario_visible_buscar_id and not formulario_visible_categoria and not formulario_visible_combinada and not formulario_visible_filtrar_precio and not formulario_visible_actualizar_datos and not actualizar_atributos:
             formulario_visible_eliminar = True
@@ -170,7 +213,7 @@ def manejar_eventos(event):
                 id = input_box_buscar_id["text"]
                 if id:
                     
-                    if raiz:
+                    if arbol.raiz:
                         nodo=arbol.buscar_nodo_por_id(int(id))
                         producto=nodo.producto
                         if producto:
@@ -180,8 +223,8 @@ def manejar_eventos(event):
                             atributos_productos["Cantidad"]=str(producto.cantidad)
                             input_box_buscar_id["text"]=""
                             ventana.fill((255,255,255))
-                            dibujar_nodo_main(ventana, raiz, (screen_width // 2), 150, 120,font)
-                            animacion=dibujar_animacion_buscar_id(ventana,raiz,(screen_width // 2), 150, 120,font,int(id))
+                            dibujar_nodo_main(ventana, arbol.raiz, (screen_width // 2), 150, 120,font)
+                            animacion=dibujar_animacion_buscar_id(ventana,arbol.raiz,(screen_width // 2), 150, 120,font,int(id))
                         else:
                             print("El nodo no existe")    
                     print("No hay ningun arbol guardado")
@@ -206,43 +249,6 @@ def manejar_eventos(event):
         else:
             input_box_buscar_id["text"] += event.unicode
             
-    #filtrar precio
-    for box in input_boxes_filtrar_precio:
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if formulario_visible_filtrar_precio:
-                box["active"] = box["rect"].collidepoint(event.pos)
-                if filtrar_precio_boton.collidepoint(event.pos):
-                    precio_min = input_boxes_filtrar_precio[0]["text"]
-                    precio_max = input_boxes_filtrar_precio[1]["text"]
-
-                    if precio_min and precio_max and precio_min < precio_max:
-                        try:
-                            formulario_visible_filtrar_precio = False
-                            precio_min=int(precio_min)
-                            precio_max=int(precio_max)
-                            ventana.fill((255,255,255))
-                            dibujar_nodo_main(ventana, raiz, (screen_width // 2), 150, 120,font)
-                            animacion=dibujar_animacion_filtrar(ventana,raiz,(screen_width // 2), 150, 120,font,raiz,precio_min,precio_max,None)
-                            for box in input_boxes_filtrar_precio:
-                                box["text"] = ""
-                        except ValueError:
-                            print("Error")
-                    else:   
-                        print("Todos los campos deben estar llenos")
-            if mostrar_filtrar_precio_boton.collidepoint(event.pos) and not formulario_visible_producto and not formulario_visible_eliminar and not formulario_visible_buscar_id and not formulario_visible_categoria and not formulario_visible_combinada  and not formulario_visible_actualizar_datos and not actualizar_atributos :
-
-                formulario_visible_filtrar_precio = True
-
-            if volver_menu_boton.collidepoint(event.pos):
-                formulario_visible_filtrar_precio = False
-
-        if box["active"] and formulario_visible_filtrar_precio and event.type == pygame.KEYDOWN :
-            if event.key == pygame.K_RETURN:
-                box["active"] = False
-            elif event.key == pygame.K_BACKSPACE:
-                box["text"] = box["text"][:-1]
-            else:   
-                box["text"] += event.unicode
    
     #Filtrar por categoria
     if event.type == pygame.MOUSEBUTTONDOWN:
@@ -253,8 +259,8 @@ def manejar_eventos(event):
                 if categoria:
                     # productos=arbol.filtrar_categoria(categoria)
                     ventana.fill((255,255,255))
-                    dibujar_nodo_main(ventana, raiz, (screen_width // 2), 150, 120,font)
-                    animacion=dibujar_animacion_filtrar(ventana,raiz,(screen_width // 2), 150, 120,font,raiz,None,None,categoria)
+                    dibujar_nodo_main(ventana, arbol.raiz, (screen_width // 2), 150, 120,font)
+                    animacion=dibujar_animacion_filtrar(ventana,arbol.raiz,(screen_width // 2), 150, 120,font,arbol.raiz,None,None,categoria)
 
                     
 
@@ -282,7 +288,7 @@ def manejar_eventos(event):
                     categoria = input_boxes_combinada[3]["text"]
                     ventana.fill((255,255,255))
 
-                    dibujar_nodo_main(ventana, raiz, (screen_width // 2), 150, 120,font)
+                    dibujar_nodo_main(ventana,arbol.raiz, (screen_width // 2), 150, 120,font)
                     dibujar_animacion_filtrar_combinada(ventana,arbol.raiz,(screen_width // 2), 150, 120,font,categoria,cantidad,precio_min,precio_max,arbol.raiz)
                     formulario_visible_combinada=False
                     for box in input_boxes_combinada:
@@ -308,6 +314,7 @@ def manejar_eventos(event):
                 nombre = input_box_nombre["text"]
                 if nombre:
                     if arbol.buscar_nodo_nombre(nombre):
+                        print("hola")
                         nodo_a_actualizar=arbol.buscar_nodo_nombre(nombre)
                         input_boxes_actualizar[0]["text"]=str(nodo_a_actualizar.producto.cantidad)
                         input_boxes_actualizar[1]["text"]=str(nodo_a_actualizar.producto.precio)
@@ -350,30 +357,54 @@ def manejar_eventos(event):
                 box["text"] = box["text"][:-1]
             else:   
                 box["text"] += event.unicode    
-
+    #Cargar arbol
     if event.type == pygame.MOUSEBUTTONDOWN:
-        if cargar_arbol_boton.collidepoint(event.pos):
-            cargar_arbol = True
         if cargar_arbol:
-            cargar_arbol_archivo(ventana,screen_info ,arbol, "arboles/arbol2.json")
-            raiz=arbol.raiz
-            cargar_arbol=False
+            input_box_nombre_archivo_cargar["active"] = input_box_nombre_archivo_cargar["rect"].collidepoint(event.pos)
+            if cargar_arbol_boton.collidepoint(event.pos):
+                nombre = input_box_nombre_archivo_cargar["text"]
+                if nombre:
+                    cargar_arbol=False
+                    cargar_arbol_archivo(ventana,screen_info, arbol, nombre)
+                    
+                    input_box_nombre_archivo_cargar["text"] =""
 
-        # if volver_menu_boton.collidepoint(event.pos) :
-        #     cargar_arbol = False
+        if mostrar_cargar_arbol_boton.collidepoint(event.pos) and not formulario_visible_producto  and not formulario_visible_buscar_id and not formulario_visible_categoria and not formulario_visible_combinada and not formulario_visible_filtrar_precio and not formulario_visible_actualizar_datos and not actualizar_atributos:
+            cargar_arbol = True
+        if volver_menu_boton.collidepoint(event.pos) :
+            cargar_arbol = False
+
+    if input_box_nombre_archivo_cargar["active"] and cargar_arbol and event.type == pygame.KEYDOWN :
+        if event.key == pygame.K_RETURN:
+            input_box_nombre_archivo_cargar["active"] = False
+        elif event.key == pygame.K_BACKSPACE:
+            input_box_nombre_archivo_cargar["text"] = input_box_nombre_archivo_cargar["text"][:-1]
+        else:
+            input_box_nombre_archivo_cargar["text"] += event.unicode
+    #Guardar Arbol   
     if event.type == pygame.MOUSEBUTTONDOWN:
-        if guardar_arbol_boton.collidepoint(event.pos):
-            guardar_arbol = True
         if guardar_arbol:
-            nombre = "arbol2"
-            guardar_arbol_archivo(arbol,nombre)
-            raiz=arbol.raiz
-            guardar_arbol=False
+            input_box_nombre_archivo_guardar["active"] = input_box_nombre_archivo_guardar["rect"].collidepoint(event.pos)
+            if guardar_arbol_boton.collidepoint(event.pos):
+                nombre = input_box_nombre_archivo_guardar["text"]
+                if nombre:
+                    guardar_arbol=False
+                    guardar_arbol_archivo(arbol,nombre)
+                    
+                    input_box_nombre_archivo_guardar["text"] =""
 
-        # if volver_menu_boton.collidepoint(event.pos) :
-        #     guardar_arbol = False
+        if mostrar_guardar_arbol_boton.collidepoint(event.pos) and not formulario_visible_producto  and not formulario_visible_buscar_id and not formulario_visible_categoria and not formulario_visible_combinada and not formulario_visible_filtrar_precio and not formulario_visible_actualizar_datos and not actualizar_atributos:
+            guardar_arbol = True
+        if volver_menu_boton.collidepoint(event.pos) :
+            guardar_arbol = False
 
-    
+    if input_box_nombre_archivo_guardar["active"] and guardar_arbol and event.type == pygame.KEYDOWN :
+        if event.key == pygame.K_RETURN:
+            input_box_nombre_archivo_guardar["active"] = False
+        elif event.key == pygame.K_BACKSPACE:
+            input_box_nombre_archivo_guardar["text"] = input_box_nombre_archivo_guardar["text"][:-1]
+        else:
+            input_box_nombre_archivo_guardar["text"] += event.unicode
     
     
 running = True  
@@ -504,7 +535,22 @@ while running:
         pintar_rectangulo_bordeado(ventana, volver_menu_boton, (255, 0, 0), 10)
         ventana.blit(font.render("Volver", True, (255, 255, 255)), (volver_menu_boton.x + 10, volver_menu_boton.y + 5))   
 
-
+    elif guardar_arbol:
+        pintar_rectangulo_bordeado(ventana,input_box_nombre_archivo_guardar["rect"],input_box_nombre_archivo_guardar["color"],10)
+        ventana.blit(font.render(input_box_nombre_archivo_guardar["text"], True, (0, 0, 0)), (input_box_nombre_archivo_guardar["rect"].x + 5, input_box_nombre_archivo_guardar["rect"].y + 5))
+        ventana.blit(font.render("Ingrese el nombre del arbol", True, (0, 0, 0)), (input_box_nombre_archivo_guardar["rect"].x -310, input_box_nombre_archivo_guardar["rect"].y +5))
+        pintar_rectangulo_bordeado(ventana, volver_menu_boton, (255, 0, 0), 10)
+        ventana.blit(font.render("Volver", True, (255, 255, 255)), (volver_menu_boton.x + 10, volver_menu_boton.y + 5))   
+        pintar_rectangulo_bordeado(ventana, guardar_arbol_boton, (0, 255, 0), 10)
+        ventana.blit(font.render("Guardar", True, (0, 0, 0)), (guardar_arbol_boton.x + 10, guardar_arbol_boton.y + 9))
+    elif cargar_arbol:
+        pintar_rectangulo_bordeado(ventana,input_box_nombre_archivo_cargar["rect"],input_box_nombre_archivo_cargar["color"],10)
+        ventana.blit(font.render(input_box_nombre_archivo_cargar["text"], True, (0, 0, 0)), (input_box_nombre_archivo_cargar["rect"].x + 5, input_box_nombre_archivo_cargar["rect"].y + 5))
+        ventana.blit(font.render("Ingrese el nombre del arbol", True, (0, 0, 0)), (input_box_nombre_archivo_cargar["rect"].x -310, input_box_nombre_archivo_cargar["rect"].y +5))
+        pintar_rectangulo_bordeado(ventana, volver_menu_boton, (255, 0, 0), 10)
+        ventana.blit(font.render("Volver", True, (255, 255, 255)), (volver_menu_boton.x + 10, volver_menu_boton.y + 5))   
+        pintar_rectangulo_bordeado(ventana, cargar_arbol_boton, (0, 255, 0), 10)
+        ventana.blit(font.render("Cargar", True, (0, 0, 0)), (cargar_arbol_boton.x + 10, cargar_arbol_boton.y + 9))
 
     else:
         #Muestra el boton de agregar producto producto
@@ -529,15 +575,14 @@ while running:
         pintar_rectangulo_bordeado(ventana, mostrar_actualizar_datos, (0, 128, 0), 10)
         ventana.blit(font.render("Actualizar datos", True, (255, 255, 255)), (mostrar_actualizar_datos.x +5, mostrar_actualizar_datos.y + 8))
 
-        pintar_rectangulo_bordeado(ventana, guardar_arbol_boton, (0, 128, 0), 10)
-        ventana.blit(font.render("Guardar el arbol", True, (255, 255, 255)), (guardar_arbol_boton.x +5, guardar_arbol_boton.y + 8))
+        pintar_rectangulo_bordeado(ventana, mostrar_guardar_arbol_boton, (0, 128, 0), 10)
+        ventana.blit(font.render("Guardar el arbol", True, (255, 255, 255)), (mostrar_guardar_arbol_boton.x +5, mostrar_guardar_arbol_boton.y + 8))
     
-        pintar_rectangulo_bordeado(ventana, cargar_arbol_boton, (0, 128, 0), 10)
-        ventana.blit(font.render("Cargar arbol", True, (255, 255, 255)), (cargar_arbol_boton.x +5, cargar_arbol_boton.y + 8))
+        pintar_rectangulo_bordeado(ventana, mostrar_cargar_arbol_boton, (0, 128, 0), 10)
+        ventana.blit(font.render("Cargar arbol", True, (255, 255, 255)), (mostrar_cargar_arbol_boton.x +5, mostrar_cargar_arbol_boton.y + 8))
     
-    if not formulario_visible_buscar_id and not actualizar_atributos:
+    if not formulario_visible_buscar_id and not actualizar_atributos and not cargar_arbol:
         dibujar_nodo_main(ventana, arbol.raiz, (screen_width // 2)+100, 150, 120,font)
     pygame.display.update() 
-           
-    
+  
 pygame.quit()
